@@ -17,8 +17,8 @@ const UserSchema = new Schema({
   },
   password: {
     type: String,
+    minLength: 6,
     required: "A password is required",
-    validate: [({ length }) => length >= 6, "Password should be at least 6 Characters"],
     trim: true
   },
 
@@ -34,7 +34,7 @@ const UserSchema = new Schema({
   ],
   friends: [{
     type: Schema.Types.ObjectId,
-    ref: 'Friends'
+    ref: 'User'
   }]
 },
   {
@@ -47,7 +47,7 @@ const UserSchema = new Schema({
 
 
 UserSchema.virtual('friendCounter').get(function () {
-  return this.friends.reduce((total, friend) => total + friend.replies.length + 1, 0);
+  return this.friends.length
 })
 const User = model('users', UserSchema);
 

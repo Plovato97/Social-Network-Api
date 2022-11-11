@@ -1,20 +1,22 @@
-const { User } = require('../models');
+const { User, Thought } = require('../models');
 
 const userController = {
     createUser({ body }, res) {
-        User.create(body)
-            .then(dbUser => res.json(dbUser))
-            .catch(err => res.status(400).json(err));
+        User.create({ username: body.username, email: body.email, password: body.password})
+        .then(dbUserData => res.json(dbUserData))
+        .catch(err => res.status(400).json(err))
     },
 
     getUser(req, res) {
-        User.find({})
+        User.find()
             .populate({
                 path: 'thoughts',
                 select: '-__v'
             })
-            .select('-__v')
-            .sort({ _id: -1 })
+            // .populate({ 
+            //     path: 'friends', 
+            //     select: '-__v'
+            // })
             .then(dbUser => res.json(dbUser))
             .catch(err => res.status(400).json(err));
     },
@@ -24,6 +26,11 @@ const userController = {
             .populate({
                 path: 'thoughts',
                 select: '-__v'
+            })
+            .populate({ 
+                path: 'thoughts', 
+                select: '-__v', 
+                populate: { path: 'reactions'}
             })
             .select('-__v')
             .then(dbUser => res.json(dbUser))
@@ -47,7 +54,8 @@ const userController = {
                     res.status(404).json({ message: 'No user found with this Id!' });
                     return
                 }
-                res.json(dbPizzaData);
+                Thought.deleteMany({ username: dbUserData.username})
+                res.json(dbUserData);
             })
             .catch(err => res.status(400).json(err));
     }
